@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#ece5d3"/>
+  <circle cx="400" cy="300" r="150" fill="#dfe8cf"/>
+  <path d="M400 388c-84-37-126-105-108-183 92 8 159 64 178 154-28 28-52 36-70 29Z" fill="#4e7f52"/>
+  <path d="M414 359c28-67 79-113 118-119-7 70-54 121-109 138Z" fill="#93ad6e"/>
+  <path d="M397 390c-5-53-23-97-57-135" fill="none" stroke="#ece5d3" stroke-width="16" stroke-linecap="round"/>
+  <text x="400" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#385a3a">Fresh produce</text>
+</svg>

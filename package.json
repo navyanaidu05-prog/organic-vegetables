@@ -1,0 +1,29 @@
+{
+  "name": "organic-vegetables",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Organic Vegetables - farm-fresh produce delivery with UPI checkout",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "postinstall": "node scripts/copy-vendor.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "leaflet": "^1.9.4",
+    "razorpay": "^2.9.6",
+    "zod": "^4.1.12"
+  }
+}
