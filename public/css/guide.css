@@ -1,0 +1,335 @@
+.page-hero-guide {
+  background:
+    radial-gradient(circle at 84% 26%, rgba(141, 174, 98, 0.22), transparent 32%),
+    linear-gradient(135deg, rgba(255, 253, 248, 0.55), transparent 52%),
+    var(--cream);
+}
+
+.guide-hero-telugu {
+  margin-top: 18px;
+  color: var(--forest);
+  font-family: "Nirmala UI", "Gautami", "Noto Sans Telugu", var(--sans);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.65;
+}
+
+.guide-hero-card {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  min-width: 245px;
+  padding: 23px 26px 21px;
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(141, 174, 98, 0.3), transparent 48%),
+    var(--forest);
+  box-shadow: var(--shadow-md);
+  color: var(--cream);
+}
+
+.guide-hero-number {
+  font-family: var(--serif);
+  font-size: 3.35rem;
+  font-weight: 550;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.guide-hero-label {
+  margin-top: 7px;
+  color: var(--sage-soft);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.guide-hero-meta {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(247, 242, 228, 0.18);
+  color: rgba(247, 242, 228, 0.66);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+}
+
+.guide-section {
+  padding-top: 42px;
+}
+
+.guide-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.guide-toolbar .search-field {
+  flex: 1;
+}
+
+.guide-clear {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.guide-filter-row {
+  margin-bottom: 16px;
+}
+
+.guide-filter-row .category-chips {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.guide-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 26px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.62);
+}
+
+.guide-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.guide-letter:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--cream-deep);
+  color: var(--forest);
+}
+
+.guide-letter.is-active {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--cream);
+}
+
+.guide-letter.is-empty,
+.guide-letter:disabled {
+  color: var(--line-strong);
+  opacity: 0.55;
+}
+
+.guide-letter.is-active:disabled {
+  opacity: 1;
+}
+
+.guide-letter-all {
+  width: auto;
+  padding: 0 13px;
+  letter-spacing: 0.02em;
+}
+
+.guide-meta {
+  margin-bottom: 28px;
+}
+
+.guide-group {
+  margin-bottom: 44px;
+  scroll-margin-top: 110px;
+}
+
+.guide-group:last-child {
+  margin-bottom: 0;
+}
+
+.guide-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.guide-group-head h2 {
+  color: var(--forest);
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  font-weight: 550;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.guide-group-head span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guide-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.guide-card {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 0 1px 0 rgba(31, 43, 34, 0.02);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.guide-card:hover {
+  border-color: rgba(61, 122, 71, 0.38);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.guide-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.guide-card-copy {
+  min-width: 0;
+}
+
+.guide-card-copy h3 {
+  color: var(--forest-deep);
+  font-size: 1.14rem;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.22;
+}
+
+.guide-telugu {
+  margin-top: 6px;
+  color: var(--forest);
+  font-family: "Nirmala UI", "Gautami", "Noto Sans Telugu", var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.55;
+}
+
+.guide-translit {
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+.guide-category {
+  flex: 0 0 auto;
+  max-width: 124px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--sage-soft);
+  color: var(--forest-soft);
+  font-size: 0.56rem;
+  font-weight: 750;
+  letter-spacing: 0.025em;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.guide-note {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .guide-hero-card {
+    align-self: stretch;
+  }
+
+  .guide-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .guide-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .guide-clear {
+    align-self: flex-start;
+  }
+
+  .guide-filter-row .category-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .guide-filter-row .category-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .guide-letters {
+    gap: 5px;
+    padding: 11px;
+  }
+
+  .guide-letter {
+    width: 31px;
+    height: 31px;
+  }
+}
+
+@media (max-width: 600px) {
+  .guide-hero-card {
+    padding: 20px 22px 18px;
+  }
+
+  .guide-hero-number {
+    font-size: 2.9rem;
+  }
+
+  .guide-card {
+    padding: 16px 16px 15px;
+  }
+
+  .guide-card-head {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .guide-category {
+    max-width: none;
+    align-self: flex-start;
+  }
+
+  .guide-group {
+    margin-bottom: 34px;
+  }
+}

@@ -1,3 +1,4 @@
+import { vegetableGuide, vegetableGuideCategories } from "./vegetables.js";
 import {
   ORDER_STATUS_META,
   TRACK_STEPS,
@@ -48,6 +49,7 @@ export function renderHeader({ config, user, cartCount, path }) {
   const radius = config?.delivery?.radiusKm || 15;
   const freeOver = formatMoney(config?.delivery?.freeOverPaise || 0);
   const shopActive = path.startsWith("/shop");
+  const guideActive = path.startsWith("/vegetables");
   const ordersActive = path.startsWith("/orders");
   const adminActive = path.startsWith("/admin");
   const homeActive = path === "/";
@@ -76,6 +78,7 @@ export function renderHeader({ config, user, cartCount, path }) {
         <nav class="desktop-nav" aria-label="Primary navigation">
           ${navLink("/", "Home", homeActive)}
           ${navLink("/shop", "Shop", shopActive)}
+          ${navLink("/vegetables", "Veg guide", guideActive)}
           ${navLink("/#promise", "Our promise", false)}
           ${navLink("/orders", "My orders", ordersActive)}
           ${user?.role === "admin" ? navLink("/admin", "Admin", adminActive) : ""}
@@ -148,6 +151,7 @@ export function renderFooter({ config }) {
       <div class="footer-col">
         <h3>Explore</h3>
         <a href="/shop" data-link>Shop vegetables</a>
+        <a href="/vegetables" data-link>Indian vegetable guide</a>
         <a href="/#promise" data-link>Our promise</a>
         <a href="/orders" data-link>Track an order</a>
         <a href="/account" data-link>My account</a>
@@ -561,6 +565,122 @@ export function renderShop({ products, categories, config, initialCategory = "",
           <h3>No vegetables found</h3>
           <p>Try a different search or category.</p>
           <button type="button" class="btn btn-outline" data-action="clear-shop-filters">Clear filters</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function guideCardMarkup(entry) {
+  const searchText = [entry.english, entry.telugu, entry.transliteration, entry.category, entry.note || ""]
+    .join(" ")
+    .toLowerCase();
+  return `
+    <article class="guide-card" data-guide-card data-letter="${escapeHtml(entry.english.charAt(0).toUpperCase())}" data-category="${escapeHtml(entry.category)}" data-search="${escapeHtml(searchText)}">
+      <div class="guide-card-head">
+        <div class="guide-card-copy">
+          <h3>${escapeHtml(entry.english)}</h3>
+          <p class="guide-telugu" lang="te">${escapeHtml(entry.telugu)}</p>
+          <p class="guide-translit">${escapeHtml(entry.transliteration)}</p>
+        </div>
+        <span class="guide-category">${escapeHtml(entry.category)}</span>
+      </div>
+      ${entry.note ? `<p class="guide-note">${escapeHtml(entry.note)}</p>` : ""}
+    </article>
+  `;
+}
+
+function guideGroupMarkup(letter, entries) {
+  return `
+    <section class="guide-group" data-guide-group="${letter}">
+      <div class="guide-group-head">
+        <h2>${letter}</h2>
+        <span data-guide-group-count>${plural(entries.length, "vegetable")}</span>
+      </div>
+      <div class="guide-card-grid">${entries.map(guideCardMarkup).join("")}</div>
+    </section>
+  `;
+}
+
+export function renderGuide({ initialCategory = "", initialSearch = "", initialLetter = "" } = {}) {
+  const activeCategory = vegetableGuideCategories.includes(initialCategory) ? initialCategory : "";
+  const sorted = [...vegetableGuide].sort((a, b) => a.english.localeCompare(b.english));
+  const groups = new Map();
+  for (const entry of sorted) {
+    const letter = entry.english.charAt(0).toUpperCase();
+    if (!groups.has(letter)) groups.set(letter, []);
+    groups.get(letter).push(entry);
+  }
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const letters = [...groups.keys()].sort();
+  const requestedLetter = /^[a-z]$/i.test(initialLetter) ? initialLetter.toUpperCase() : "";
+  const activeLetter = letters.includes(requestedLetter) ? requestedLetter : "";
+
+  return `
+    <section class="page-hero page-hero-guide">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> From local markets</span>
+        <div class="page-hero-row">
+          <div>
+            <h1>Indian vegetables, A to Z.</h1>
+            <p>A practical guide to the greens, gourds, beans and roots found in Indian kitchens — with Telugu names for every entry.</p>
+            <p class="guide-telugu guide-hero-telugu" lang="te">కూరగాయల జాబితా</p>
+          </div>
+          <div class="guide-hero-card">
+            <span class="guide-hero-number">${vegetableGuide.length}</span>
+            <span class="guide-hero-label">vegetables, greens &amp; aromatics</span>
+            <span class="guide-hero-meta">${vegetableGuideCategories.length} categories · English + Telugu</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section guide-section">
+      <div class="container">
+        <div class="guide-toolbar">
+          <label class="search-field">
+            ${icon("search", 19)}
+            <input type="search" id="guide-search" placeholder="Search tomato, టమాటా, gongura…" value="${escapeHtml(initialSearch)}" autocomplete="off" aria-label="Search vegetables by English or Telugu name">
+          </label>
+          <button type="button" class="btn btn-outline btn-sm guide-clear" data-action="clear-guide-filters">Clear filters</button>
+        </div>
+
+        <div class="guide-filter-row">
+          <div class="category-chips" id="guide-categories" role="group" aria-label="Filter by category">
+            <button type="button" class="chip ${activeCategory ? "" : "is-active"}" data-guide-category="">All</button>
+            ${vegetableGuideCategories
+              .map(
+                (category) =>
+                  `<button type="button" class="chip ${activeCategory === category ? "is-active" : ""}" data-guide-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <nav class="guide-letters" aria-label="Filter by first letter">
+          <button type="button" class="guide-letter guide-letter-all ${activeLetter ? "" : "is-active"}" data-guide-letter="" aria-pressed="${activeLetter ? "false" : "true"}">All</button>
+          ${alphabet
+            .map(
+              (letter) =>
+                `<button type="button" class="guide-letter ${activeLetter === letter ? "is-active" : ""} ${letters.includes(letter) ? "" : "is-empty"}" data-guide-letter="${letter}" aria-pressed="${activeLetter === letter ? "true" : "false"}" ${letters.includes(letter) ? "" : "disabled"}>${letter}</button>`
+            )
+            .join("")}
+        </nav>
+
+        <div class="shop-meta guide-meta">
+          <span id="guide-count">${plural(vegetableGuide.length, "vegetable")}</span>
+          <span class="shop-meta-note">${icon("leaf", 15)} English, Telugu script and transliteration</span>
+        </div>
+
+        <div class="guide-groups" id="guide-groups">
+          ${letters.map((letter) => guideGroupMarkup(letter, groups.get(letter))).join("")}
+        </div>
+
+        <div id="guide-empty" class="empty-state" hidden>
+          <div class="empty-icon">${icon("search", 30)}</div>
+          <h3>No vegetables found</h3>
+          <p>Try a different spelling, Telugu name or category.</p>
+          <button type="button" class="btn btn-outline" data-action="clear-guide-filters">Show all vegetables</button>
         </div>
       </div>
     </section>

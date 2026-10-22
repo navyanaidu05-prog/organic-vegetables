@@ -1,4 +1,4 @@
-const CACHE_NAME = "organic-vegetables-v3";
+const CACHE_NAME = "organic-vegetables-v4";
 const APP_SHELL = "/";
 const PRECACHE = [
   "/",
@@ -10,12 +10,14 @@ const PRECACHE = [
   "/css/checkout.css",
   "/css/orders.css",
   "/css/admin.css",
+  "/css/guide.css",
   "/css/responsive.css",
   "/js/app.js",
   "/js/api.js",
   "/js/utils.js",
   "/js/ui.js",
   "/js/views.js",
+  "/js/vegetables.js",
   "/js/payments.js",
   "/assets/logo.svg",
   "/assets/favicon.svg",

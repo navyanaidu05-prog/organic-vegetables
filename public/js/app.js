@@ -41,6 +41,7 @@ const state = {
   installPrompt: null,
   cleanups: [],
   shopReset: null,
+  guideReset: null,
   isBooted: false
 };
 
@@ -778,6 +779,115 @@ function initShopFilters(initialCategory, initialSearch) {
   });
 }
 
+function initGuideFilters(initialCategory, initialSearch, initialLetter) {
+  const grid = document.getElementById("guide-groups");
+  const searchInput = document.getElementById("guide-search");
+  const countElement = document.getElementById("guide-count");
+  const emptyElement = document.getElementById("guide-empty");
+  const chips = [...document.querySelectorAll("[data-guide-category]")];
+  const letterButtons = [...document.querySelectorAll("[data-guide-letter]")];
+  if (!grid) return;
+
+  const cards = [...grid.querySelectorAll("[data-guide-card]")];
+  const groups = [...grid.querySelectorAll("[data-guide-group]")];
+  const categories = chips.map((chip) => chip.dataset.guideCategory || "").filter(Boolean);
+  const availableLetters = new Set(cards.map((card) => card.dataset.letter));
+  let activeCategory = categories.includes(initialCategory) ? initialCategory : "";
+  let search = initialSearch || "";
+  const requestedLetter = /^[a-z]$/i.test(initialLetter || "") ? initialLetter.toUpperCase() : "";
+  let activeLetter = availableLetters.has(requestedLetter) ? requestedLetter : "";
+
+  const apply = () => {
+    const term = search.trim().toLowerCase();
+    const letterCounts = new Map();
+    let matchCount = 0;
+    let visible = 0;
+
+    for (const card of cards) {
+      const matches =
+        (!activeCategory || card.dataset.category === activeCategory) &&
+        (!term || card.dataset.search.includes(term));
+      if (matches) {
+        matchCount += 1;
+        const letter = card.dataset.letter;
+        letterCounts.set(letter, (letterCounts.get(letter) || 0) + 1);
+      }
+      const show = matches && (!activeLetter || card.dataset.letter === activeLetter);
+      card.hidden = !show;
+      if (show) visible += 1;
+    }
+
+    for (const group of groups) {
+      const letter = group.dataset.guideGroup;
+      const groupCount = letterCounts.get(letter) || 0;
+      group.hidden = groupCount === 0;
+      const count = group.querySelector("[data-guide-group-count]");
+      if (count) count.textContent = `${groupCount} ${groupCount === 1 ? "vegetable" : "vegetables"}`;
+    }
+
+    if (countElement) {
+      countElement.textContent = `${visible} ${visible === 1 ? "vegetable" : "vegetables"}`;
+    }
+    if (emptyElement) emptyElement.hidden = visible > 0;
+
+    chips.forEach((chip) => {
+      chip.classList.toggle("is-active", (chip.dataset.guideCategory || "") === activeCategory);
+    });
+
+    letterButtons.forEach((button) => {
+      const letter = button.dataset.guideLetter || "";
+      const count = letter ? letterCounts.get(letter) || 0 : matchCount;
+      button.classList.toggle("is-active", letter === activeLetter);
+      button.setAttribute("aria-pressed", String(letter === activeLetter));
+      button.disabled = count === 0 && letter !== activeLetter;
+    });
+
+    const url = new URL(window.location.href);
+    if (activeCategory) url.searchParams.set("category", activeCategory);
+    else url.searchParams.delete("category");
+    if (search.trim()) url.searchParams.set("q", search.trim());
+    else url.searchParams.delete("q");
+    if (activeLetter) url.searchParams.set("letter", activeLetter);
+    else url.searchParams.delete("letter");
+    window.history.replaceState(null, "", url);
+  };
+
+  const reset = () => {
+    activeCategory = "";
+    activeLetter = "";
+    search = "";
+    if (searchInput) searchInput.value = "";
+    apply();
+  };
+
+  state.guideReset = reset;
+  addRouteCleanup(() => {
+    if (state.guideReset === reset) state.guideReset = null;
+  });
+  apply();
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      activeCategory = chip.dataset.guideCategory || "";
+      apply();
+    });
+  });
+
+  letterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const letter = button.dataset.guideLetter || "";
+      activeLetter = letter && activeLetter === letter ? "" : letter;
+      apply();
+    });
+  });
+
+  searchInput?.addEventListener("input", () => {
+    search = searchInput.value;
+    activeLetter = "";
+    apply();
+  });
+}
+
 function initOrderFilters() {
   const tabs = [...document.querySelectorAll("[data-order-filter]")];
   const cards = [...document.querySelectorAll("[data-order-card]")];
@@ -1361,6 +1471,9 @@ async function handleAction(action, element) {
     case "clear-shop-filters":
       state.shopReset?.();
       break;
+    case "clear-guide-filters":
+      state.guideReset?.();
+      break;
     case "admin-tab":
       setAdminTab(element.dataset.tab);
       break;
@@ -1475,6 +1588,19 @@ async function renderRoute({ preserveScroll = false } = {}) {
         initialSearch: params.get("q") || ""
       });
       initShopFilters(params.get("category") || "", params.get("q") || "");
+    } else if (path === "/vegetables") {
+      pageTitle = "Indian vegetable guide | Organic Vegetables";
+      const params = new URLSearchParams(search);
+      main.innerHTML = views.renderGuide({
+        initialCategory: params.get("category") || "",
+        initialSearch: params.get("q") || "",
+        initialLetter: params.get("letter") || ""
+      });
+      initGuideFilters(
+        params.get("category") || "",
+        params.get("q") || "",
+        params.get("letter") || ""
+      );
     } else if (path === "/checkout") {
       pageTitle = "Secure checkout | Organic Vegetables";
       const address = state.checkoutDraft || getSavedAddress();
