@@ -176,6 +176,46 @@ export function renderFooter({ config }) {
   `;
 }
 
+function sortByName(products) {
+  return [...products].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+  );
+}
+
+function priceListRow(product, canEdit) {
+  if (!canEdit) {
+    return `
+      <a class="price-list-row" href="/shop" data-link>
+        <span class="price-list-name">
+          <img src="${escapeHtml(product.imageUrl)}" alt="" loading="lazy">
+          <span>
+            <strong>${escapeHtml(product.name)}</strong>
+            <small>${escapeHtml(product.category)}</small>
+          </span>
+        </span>
+        <span class="price-list-price">
+          <strong>${formatMoney(product.pricePaise)}</strong>
+          <small>${escapeHtml(product.unit)}</small>
+        </span>
+      </a>`;
+  }
+  return `
+    <div class="price-list-row">
+      <span class="price-list-name">
+        <img src="${escapeHtml(product.imageUrl)}" alt="" loading="lazy">
+        <span>
+          <a class="price-list-name-link" href="/shop" data-link>${escapeHtml(product.name)}</a>
+          <small>${escapeHtml(product.category)}</small>
+        </span>
+      </span>
+      <span class="price-list-price">
+        <strong>${formatMoney(product.pricePaise)}</strong>
+        <small>${escapeHtml(product.unit)}</small>
+        <button type="button" class="price-edit-button" data-action="admin-edit-price" data-id="${product.id}" aria-label="Change price for ${escapeHtml(product.name)}">${icon("edit-3", 14)} Price</button>
+      </span>
+    </div>`;
+}
+
 function productCard(product) {
   const stockLabel =
     product.stock <= 0
@@ -247,6 +287,10 @@ export function renderHome({ products, categories, config, user }) {
     ? products.filter((product) => product.isFeatured)
     : products
   ).slice(0, 4);
+  const sortedProducts = sortByName(products);
+  const leafyProducts = sortedProducts.filter((product) => /leaf/i.test(product.category));
+  const vegetableProducts = sortedProducts.filter((product) => !/leaf/i.test(product.category));
+  const canEditPrices = user?.role === "admin";
   const categoryCards = categories.slice(0, 4).map((category, index) => {
     const product = products.find((item) => item.category === category);
     const count = products.filter((item) => item.category === category).length;
@@ -330,6 +374,36 @@ export function renderHome({ products, categories, config, user }) {
           <a class="text-link" href="/shop" data-link>Browse everything ${icon("arrow-right", 17)}</a>
         </div>
         <div class="category-grid">${categoryCards}</div>
+      </div>
+    </section>
+
+    <section class="section price-list-section" id="price-list">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow"><span class="eyebrow-dot"></span> Full harvest, A to Z</span>
+            <h2>Vegetable price list</h2>
+            <p>Every vegetable on our shelf, listed alphabetically with today's price.</p>
+          </div>
+          <a class="text-link" href="/shop" data-link>Shop everything ${icon("arrow-right", 17)}</a>
+        </div>
+        <div class="price-list">
+          <div class="price-list-row price-list-head">
+            <span>Vegetables</span>
+            <span>A–Z</span>
+          </div>
+          ${vegetableProducts.map((product) => priceListRow(product, canEditPrices)).join("")}
+          ${
+            leafyProducts.length
+              ? `<div class="price-list-row price-list-head price-list-head-group">
+                  <span>Leafy vegetables</span>
+                  <span>A–Z</span>
+                </div>
+                ${leafyProducts.map((product) => priceListRow(product, canEditPrices)).join("")}`
+              : ""
+          }
+        </div>
+        <p class="price-list-note">${icon("shield-check", 15)} Prices are set by the store admin and update on the storefront immediately.${canEditPrices ? " Use the Price buttons above to update today's rate." : ""}</p>
       </div>
     </section>
 
@@ -467,10 +541,10 @@ export function renderShop({ products, categories, config, initialCategory = "",
             <label class="sort-field">
               <span>Sort</span>
               <select id="shop-sort">
-                <option value="featured">Featured</option>
+                <option value="name" selected>Name A–Z</option>
                 <option value="price-low">Price: low to high</option>
                 <option value="price-high">Price: high to low</option>
-                <option value="name">Name A–Z</option>
+                <option value="featured">Featured</option>
               </select>
             </label>
           </div>
@@ -1276,7 +1350,10 @@ function adminInventoryTable(products) {
                 <td>
                   <div class="inventory-product">
                     <img src="${escapeHtml(product.imageUrl)}" alt="" loading="lazy">
-                    <div><strong>${escapeHtml(product.name)}</strong><span>${escapeHtml(product.category)} · ${escapeHtml(product.unit)}</span></div>
+                    <div>
+                      <input class="table-input table-input-name" type="text" name="name" value="${escapeHtml(product.name)}" maxlength="100" aria-label="Name for ${escapeHtml(product.name)}">
+                      <span>${escapeHtml(product.category)} · ${escapeHtml(product.unit)}</span>
+                    </div>
                   </div>
                 </td>
                 <td><input class="table-input" type="number" min="1" step="0.01" name="priceRupees" value="${(product.pricePaise / 100).toFixed(2)}" aria-label="Price for ${escapeHtml(product.name)}"></td>
@@ -1362,11 +1439,11 @@ export function renderAdmin({ user, stats, orders, products, activeTab = "orders
 
         <section class="admin-panel ${activeTab === "inventory" ? "is-active" : ""}" data-admin-panel="inventory">
           <div class="admin-panel-head">
-            <div><h2>Inventory</h2><p>Update price and stock instantly, or pause an item.</p></div>
+            <div><h2>Inventory</h2><p>Update the name, price and stock instantly, or pause an item.</p></div>
             <button type="button" class="btn btn-primary btn-sm" data-action="admin-add-product">${icon("plus", 17)} Add vegetable</button>
           </div>
           ${adminInventoryTable(products)}
-          <div class="admin-note">${icon("info", 16)} Changes go live on the storefront immediately. Existing orders keep the price at the time of purchase.</div>
+          <div class="admin-note">${icon("info", 16)} Changes go live on the storefront immediately. Only store admins can edit names and prices. Existing orders keep the price at the time of purchase.</div>
         </section>
       </div>
     </section>
@@ -1489,6 +1566,36 @@ export function renderAddProductModal() {
         <div class="admin-modal-actions">
           <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
           <button type="submit" class="btn btn-primary">${icon("plus", 17)} Add vegetable</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+export function renderPriceEditor(product) {
+  return `
+    <div class="admin-add-modal">
+      <header class="admin-modal-head">
+        <div>
+          <span class="eyebrow"><span class="eyebrow-dot"></span> Admin only</span>
+          <h2>Change today's rate</h2>
+        </div>
+        <button type="button" class="icon-button" data-action="close-modal" aria-label="Close">${icon("x", 22)}</button>
+      </header>
+      <form data-form="admin-price" data-product-id="${product.id}" novalidate>
+        <div class="form-error" data-form-error role="alert" hidden></div>
+        <div class="price-editor-product">
+          <img src="${escapeHtml(product.imageUrl)}" alt="" loading="lazy">
+          <div>
+            <strong>${escapeHtml(product.name)}</strong>
+            <span>${escapeHtml(product.category)} · ${escapeHtml(product.unit)}</span>
+          </div>
+          <span class="price-editor-current">Now ${formatMoney(product.pricePaise)}</span>
+        </div>
+        <label class="field"><span>New price (₹)</span><input name="priceRupees" type="number" min="1" step="0.01" value="${(product.pricePaise / 100).toFixed(2)}" required data-autofocus></label>
+        <div class="admin-modal-actions">
+          <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">${icon("check", 17)} Update price</button>
         </div>
       </form>
     </div>

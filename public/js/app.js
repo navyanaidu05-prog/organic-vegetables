@@ -711,7 +711,7 @@ function initShopFilters(initialCategory, initialSearch) {
   if (!grid) return;
   let activeCategory = initialCategory || "";
   let search = initialSearch || "";
-  let sort = "featured";
+  let sort = "name";
 
   const sortCards = () => {
     const cards = [...grid.querySelectorAll("[data-product-card]")];
@@ -1125,8 +1125,13 @@ async function handleFormSubmit(form) {
   if (type === "admin-product") {
     const id = Number(form.dataset.productId);
     const row = form.closest("tr");
+    const name = String(row?.querySelector('[name="name"]')?.value || "").trim();
     const price = Number(row?.querySelector('[name="priceRupees"]')?.value);
     const stock = Number(row?.querySelector('[name="stock"]')?.value);
+    if (name.length < 2) {
+      toast("Enter a vegetable name with at least 2 characters.", { type: "error" });
+      return;
+    }
     if (!Number.isFinite(price) || price <= 0 || !Number.isInteger(stock) || stock < 0) {
       toast("Enter a valid price and stock quantity.", { type: "error" });
       return;
@@ -1134,12 +1139,38 @@ async function handleFormSubmit(form) {
     restore = submit ? busy(submit, "Saving…") : restore;
     try {
       await api.patch(`/admin/products/${id}`, {
+        name,
         pricePaise: Math.round(price * 100),
         stock,
         isActive: Boolean(row.querySelector('[name="isActive"]')?.checked),
         isFeatured: Boolean(row.querySelector('[name="isFeatured"]')?.checked)
       });
       toast("Inventory updated.");
+      await renderRoute({ preserveScroll: true });
+    } catch (error) {
+      restore();
+      handleError(error, form);
+    }
+    return;
+  }
+
+  if (type === "admin-price") {
+    const id = Number(form.dataset.productId);
+    const price = Number(new FormData(form).get("priceRupees"));
+    if (!Number.isFinite(price) || price <= 0) {
+      showFormError(form, "Enter a valid price.");
+      return;
+    }
+    restore = submit ? busy(submit, "Saving…") : restore;
+    try {
+      const result = await api.patch(`/admin/products/${id}`, {
+        pricePaise: Math.round(price * 100)
+      });
+      state.products = state.products.map((product) =>
+        product.id === result.product.id ? result.product : product
+      );
+      closeDialog();
+      toast("Today's rate updated on the storefront.");
       await renderRoute({ preserveScroll: true });
     } catch (error) {
       restore();
@@ -1338,6 +1369,12 @@ async function handleAction(action, element) {
       break;
     case "admin-add-product":
       openDialog(views.renderAddProductModal(), { className: "modal-medium" });
+      break;
+    case "admin-edit-price":
+      {
+        const product = findProduct(Number(element.dataset.id));
+        if (product) openDialog(views.renderPriceEditor(product), { className: "modal-medium" });
+      }
       break;
     case "import-product-image":
       break;

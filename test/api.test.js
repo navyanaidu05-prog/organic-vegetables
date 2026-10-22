@@ -33,6 +33,11 @@ test("serves the public catalog, delivery quote, and hardened app shell", async 
   const catalog = await client.request("/api/products");
   assert.equal(catalog.status, 200);
   assert.equal(catalog.data.products.length, 9);
+  const catalogNames = catalog.data.products.map((product) => product.name);
+  assert.deepEqual(
+    catalogNames,
+    [...catalogNames].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
+  );
   const tomato = productBySlug(catalog.data.products, "vine-tomatoes");
   assert.equal(tomato.stock, 45);
   assert.equal(tomato.pricePaise, 4900);
@@ -346,6 +351,11 @@ test("lets admins manage products and rejects out-of-area or unavailable orders"
 
   const denied = await customer.request("/api/admin/products");
   assert.equal(denied.status, 403);
+  const deniedPatch = await customer.request("/api/admin/products/1", {
+    method: "PATCH",
+    body: { name: "Customer Override", pricePaise: 100 }
+  });
+  assert.equal(deniedPatch.status, 403);
   assert.equal((await loginAdmin(admin)).status, 200);
 
   const stats = await admin.request("/api/admin/stats");
@@ -376,6 +386,18 @@ test("lets admins manage products and rejects out-of-area or unavailable orders"
   assert.equal(created.status, 201);
   assert.equal(created.data.product.slug, "test-kale");
   const productId = created.data.product.id;
+
+  const renamed = await admin.request(`/api/admin/products/${productId}`, {
+    method: "PATCH",
+    body: { name: "Test Curly Kale", pricePaise: 4300 }
+  });
+  assert.equal(renamed.status, 200);
+  assert.equal(renamed.data.product.name, "Test Curly Kale");
+  assert.equal(renamed.data.product.slug, "test-curly-kale");
+  assert.equal(renamed.data.product.pricePaise, 4300);
+
+  const publicAfterRename = await customer.request("/api/products");
+  assert.equal(productBySlug(publicAfterRename.data.products, "test-curly-kale").pricePaise, 4300);
 
   const patched = await admin.request(`/api/admin/products/${productId}`, {
     method: "PATCH",

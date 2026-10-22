@@ -310,6 +310,11 @@
   width: 62px;
 }
 
+.table-input-name {
+  width: 150px;
+  font-weight: 600;
+}
+
 .low-stock {
   display: inline-block;
   margin-left: 5px;
@@ -565,6 +570,48 @@
 
 .admin-add-modal form > .field {
   margin-bottom: 13px;
+}
+
+.price-editor-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+}
+
+.price-editor-product img {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.price-editor-product > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.price-editor-product strong {
+  color: var(--forest);
+  font-size: 0.82rem;
+}
+
+.price-editor-product span {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.price-editor-current {
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--forest) !important;
 }
 
 .image-presets {

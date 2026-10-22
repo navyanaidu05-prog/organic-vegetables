@@ -39,7 +39,7 @@ export function listPublicProducts(db, { q = "", category = "" } = {}) {
   const rows = db
     .prepare(
       `SELECT * FROM products WHERE ${where.join(" AND ")}
-       ORDER BY is_featured DESC, name COLLATE NOCASE ASC`
+       ORDER BY name COLLATE NOCASE ASC`
     )
     .all(...params);
   const categories = db
